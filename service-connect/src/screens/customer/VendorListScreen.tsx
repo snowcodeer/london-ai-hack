@@ -19,6 +19,7 @@ import {
 } from '../../services/matchingWithValyu';
 import { ProblemCategory } from '../../types';
 import UnverifiedVendorCard from '../../components/UnverifiedVendorCard';
+import VerifiedBusinessCard from '../../components/VerifiedBusinessCard';
 
 interface RouteParams {
   latitude: number;
@@ -122,11 +123,18 @@ export default function VendorListScreen() {
             <Ionicons name="checkmark-circle" size={24} color="#34C759" />
             <Text style={styles.sectionTitle}>Verified Providers</Text>
           </View>
-          {/* TODO: Add verified business cards here */}
-          <Text style={styles.placeholderText}>
-            {matchingResult.verifiedBusinesses.length} verified provider
-            {matchingResult.verifiedBusinesses.length > 1 ? 's' : ''} found
-          </Text>
+
+          {matchingResult.verifiedBusinesses.map((match, index) => (
+            <VerifiedBusinessCard
+              key={match.business.id}
+              business={match.business}
+              distanceMiles={match.distanceMiles}
+              onPress={() => {
+                // TODO: Navigate to booking screen
+                console.log('Book service with:', match.business.name);
+              }}
+            />
+          ))}
         </View>
       )}
 

@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import CustomerDashboard from '../screens/customer/CustomerDashboard';
 import CameraScreen from '../screens/customer/CameraScreen';
 import ProblemAnalysisScreen from '../screens/customer/ProblemAnalysisScreen';
+import VendorListScreen from '../screens/customer/VendorListScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,11 @@ export default function CustomerNavigator() {
         name="ProblemAnalysis"
         component={ProblemAnalysisScreen}
         options={{ title: 'Problem Analysis' }}
+      />
+      <Stack.Screen
+        name="VendorList"
+        component={VendorListScreen}
+        options={{ title: 'Service Providers' }}
       />
     </Stack.Navigator>
   );
