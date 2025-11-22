@@ -104,7 +104,7 @@ export default function VendorListScreen() {
 
   const hasVerifiedBusinesses = matchingResult.verifiedBusinesses.length > 0;
   const hasUnverifiedVendors = matchingResult.unverifiedVendors.length > 0;
-  const showUnverified = shouldShowUnverifiedVendors(matchingResult);
+  const hasAnyProviders = hasVerifiedBusinesses || hasUnverifiedVendors;
 
   return (
     <ScrollView style={styles.container}>
@@ -112,19 +112,27 @@ export default function VendorListScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Service Providers</Text>
         <Text style={styles.headerSubtitle}>
-          {getMatchingSummaryMessage(matchingResult)}
+          Found {matchingResult.verifiedBusinesses.length} verified and{' '}
+          {matchingResult.unverifiedVendors.length} unverified providers in your area
         </Text>
       </View>
 
-      {/* Verified Businesses Section */}
-      {hasVerifiedBusinesses && (
+      {/* Combined Provider List */}
+      {hasAnyProviders && (
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="checkmark-circle" size={24} color="#34C759" />
-            <Text style={styles.sectionTitle}>Verified Providers</Text>
-          </View>
+          {/* Info box about unverified vendors if present */}
+          {hasUnverifiedVendors && (
+            <View style={styles.infoBox}>
+              <Ionicons name="information-circle-outline" size={20} color="#007AFF" />
+              <Text style={styles.infoText}>
+                Showing verified providers first, followed by unverified local businesses.
+                Unverified businesses are not yet on our platform - please contact them directly.
+              </Text>
+            </View>
+          )}
 
-          {matchingResult.verifiedBusinesses.map((match, index) => (
+          {/* Verified Businesses - Sorted by Distance */}
+          {matchingResult.verifiedBusinesses.map((match) => (
             <VerifiedBusinessCard
               key={match.business.id}
               business={match.business}
@@ -135,30 +143,20 @@ export default function VendorListScreen() {
               }}
             />
           ))}
-        </View>
-      )}
 
-      {/* Unverified Vendors Section */}
-      {hasUnverifiedVendors && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="search" size={24} color="#FF9500" />
-            <Text style={styles.sectionTitle}>Local Businesses Nearby</Text>
-          </View>
-
-          {showUnverified && (
-            <View style={styles.infoBox}>
-              <Ionicons name="information-circle-outline" size={20} color="#007AFF" />
-              <Text style={styles.infoText}>
-                These businesses are not yet verified on our platform. Please contact
-                them directly to confirm their services and pricing.
-              </Text>
+          {/* Divider between verified and unverified */}
+          {hasVerifiedBusinesses && hasUnverifiedVendors && (
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Additional Local Businesses</Text>
+              <View style={styles.dividerLine} />
             </View>
           )}
 
+          {/* Unverified Vendors - Sorted by Distance */}
           {matchingResult.unverifiedVendors.map((vendor, index) => (
             <UnverifiedVendorCard
-              key={index}
+              key={`unverified-${index}`}
               vendor={vendor}
               onPress={() => {
                 // TODO: Navigate to vendor detail screen
@@ -182,7 +180,7 @@ export default function VendorListScreen() {
       )}
 
       {/* No Results */}
-      {!hasVerifiedBusinesses && !hasUnverifiedVendors && (
+      {!hasAnyProviders && (
         <View style={styles.emptyContainer}>
           <Ionicons name="search-outline" size={60} color="#C7C7CC" />
           <Text style={styles.emptyTitle}>No Providers Found</Text>
@@ -345,5 +343,21 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E5EA',
+  },
+  dividerText: {
+    fontSize: 14,
+    color: '#8E8E93',
+    fontWeight: '600',
+    paddingHorizontal: 12,
   },
 });

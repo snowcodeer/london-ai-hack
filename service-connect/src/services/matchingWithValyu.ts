@@ -28,6 +28,7 @@ export interface MatchingResult {
 
 /**
  * Find both verified businesses in the SQLite database AND unverified vendors from Valyu search
+ * ALWAYS calls Valyu to supplement results. Valyu is only skipped if API fails.
  * This is the main function to use when looking for service providers
  */
 export async function findAllServiceProviders(
@@ -37,7 +38,6 @@ export async function findAllServiceProviders(
 
   try {
     // 1. First, search for verified businesses in SQLite database
-    // Note: findMatchingBusinessesFromSQLite is synchronous, but we keep async for Valyu
     const sqliteMatches = findMatchingBusinessesFromSQLite({
       latitude,
       longitude,
@@ -52,13 +52,14 @@ export async function findAllServiceProviders(
 
     console.log(`Found ${verifiedBusinesses.length} verified businesses in SQLite database`);
 
-    // 2. If no verified businesses found, search for unverified vendors using Valyu
+    // 2. ALWAYS search Valyu for additional unverified vendors to supplement results
+    // This runs in parallel with SQLite search to provide comprehensive results
     let valyuSearchResult: ValyuSearchResult | null = null;
     let unverifiedVendors: UnverifiedVendor[] = [];
 
-    if (verifiedBusinesses.length === 0) {
-      console.log('No verified businesses found in SQLite, searching Valyu for unverified vendors...');
+    console.log('Searching Valyu for unverified vendors to supplement results...');
 
+    try {
       const problemDescription = getProblemDescriptionFromCategory(category, aiDescription);
 
       valyuSearchResult = await searchUnverifiedVendors({
@@ -71,7 +72,12 @@ export async function findAllServiceProviders(
       if (valyuSearchResult && valyuSearchResult.companies) {
         unverifiedVendors = valyuSearchResult.companies;
         console.log(`Found ${unverifiedVendors.length} unverified vendors via Valyu`);
+      } else {
+        console.log('Valyu returned no results');
       }
+    } catch (valyuError) {
+      console.error('Valyu search failed, continuing with SQLite results only:', valyuError);
+      // Continue with SQLite results even if Valyu fails
     }
 
     return {

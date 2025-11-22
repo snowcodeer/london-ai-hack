@@ -178,6 +178,23 @@ Focus on quality over quantity - we want businesses that will actually join the 
         .trim();
 
       parsedResult = JSON.parse(cleanedContent);
+
+      // Sort unverified vendors by distance (closest first)
+      if (parsedResult.companies && parsedResult.companies.length > 0) {
+        parsedResult.companies.sort((a, b) => {
+          // Parse distance strings like "0.8 miles" or "2.5 miles"
+          const getDistance = (distStr: string | null): number => {
+            if (!distStr) return 999; // Put items without distance at the end
+            const match = distStr.match(/(\d+\.?\d*)/);
+            return match ? parseFloat(match[1]) : 999;
+          };
+
+          const distA = getDistance(a.distance_from_user);
+          const distB = getDistance(b.distance_from_user);
+
+          return distA - distB;
+        });
+      }
     } catch (parseError) {
       console.error('Failed to parse Valyu response as JSON:', parseError);
       console.error('Content:', jsonContent);
