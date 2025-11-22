@@ -182,17 +182,24 @@ function extractBusinessName(title: string): string | null {
 
 /**
  * Calculate relevance score based on available contact information
+ *
+ * Email is CRITICAL for business outreach - vendors without email are heavily penalized
  */
 function calculateRelevanceScore(emailCount: number, phoneCount: number, addressCount: number): number {
+  // Without email, vendor is much less valuable (max score of 4)
+  if (emailCount === 0) {
+    let score = 2; // Low base score without email
+    if (phoneCount > 0) score += 1;
+    if (addressCount > 0) score += 1;
+    return score; // Max 4 without email (never "highly recommended")
+  }
+
+  // With email, vendor is valuable
   let score = 5; // Base score
+  score += 4; // Email is CRITICAL (+4 points)
 
-  // Email is most valuable
-  if (emailCount > 0) score += 3;
-
-  // Phone number is also valuable
-  if (phoneCount > 0) score += 2;
-
-  // Physical address adds credibility
+  // Phone and address add additional value
+  if (phoneCount > 0) score += 1;
   if (addressCount > 0) score += 1;
 
   return Math.min(score, 10); // Cap at 10
