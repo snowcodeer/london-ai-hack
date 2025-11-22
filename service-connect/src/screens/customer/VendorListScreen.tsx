@@ -17,7 +17,7 @@ import {
   getMatchingSummaryMessage,
   shouldShowUnverifiedVendors,
 } from '../../services/matchingWithValyu';
-import { ProblemCategory } from '../../types';
+import { ProblemCategory, ServiceRequest } from '../../types';
 import UnverifiedVendorCard from '../../components/UnverifiedVendorCard';
 import VerifiedBusinessCard from '../../components/VerifiedBusinessCard';
 
@@ -27,6 +27,8 @@ interface RouteParams {
   category: ProblemCategory;
   aiDescription?: string;
   radiusMiles?: number;
+  address?: string;
+  city?: string;
 }
 
 export default function VendorListScreen() {
@@ -38,11 +40,39 @@ export default function VendorListScreen() {
     category,
     aiDescription,
     radiusMiles = 25,
+    address = '',
+    city = 'London',
   } = route.params as RouteParams;
 
   const [isLoading, setIsLoading] = useState(true);
   const [matchingResult, setMatchingResult] = useState<MatchingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Create a mock service request for email generation
+  const mockServiceRequest: ServiceRequest = {
+    id: 'temp-' + Date.now(),
+    customer_id: 'temp-customer',
+    customer_name: 'Customer',
+    customer_phone: '',
+    customer_email: '',
+    problem_photo_url: '',
+    ai_description: aiDescription || 'Service request',
+    problem_category: category,
+    urgency: 'medium',
+    location: {
+      address: address || 'London',
+      city: city,
+      state: 'England',
+      zip: '',
+      coordinates: {
+        latitude,
+        longitude,
+      },
+    },
+    matched_business_ids: [],
+    status: 'pending',
+    created_at: new Date().toISOString(),
+  };
 
   useEffect(() => {
     searchForProviders();
@@ -158,6 +188,7 @@ export default function VendorListScreen() {
             <UnverifiedVendorCard
               key={`unverified-${index}`}
               vendor={vendor}
+              serviceRequest={mockServiceRequest}
               onPress={() => {
                 // TODO: Navigate to vendor detail screen
                 console.log('Vendor pressed:', vendor.company_name);

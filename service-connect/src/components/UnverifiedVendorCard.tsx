@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,26 +8,24 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { UnverifiedVendor } from '../services/valyuSearch';
+import { EmailPreviewModal } from './EmailPreviewModal';
+import { ServiceRequest } from '../types';
 
 interface UnverifiedVendorCardProps {
   vendor: UnverifiedVendor;
   onPress?: () => void;
+  serviceRequest: ServiceRequest; // Add this for email context
 }
 
 export default function UnverifiedVendorCard({
   vendor,
   onPress,
+  serviceRequest,
 }: UnverifiedVendorCardProps) {
-  const handleCall = () => {
-    if (vendor.phone_number) {
-      Linking.openURL(`tel:${vendor.phone_number}`);
-    }
-  };
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
-  const handleWebsite = () => {
-    if (vendor.website_url) {
-      Linking.openURL(vendor.website_url);
-    }
+  const handleInviteToPlatform = () => {
+    setShowEmailModal(true);
   };
 
   return (
@@ -119,27 +117,14 @@ export default function UnverifiedVendorCard({
         </View>
       )}
 
-      {/* Action Buttons */}
-      <View style={styles.actions}>
-        {vendor.phone_number && (
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleCall}
-          >
-            <Ionicons name="call-outline" size={18} color="#007AFF" />
-            <Text style={styles.actionButtonText}>Call</Text>
-          </TouchableOpacity>
-        )}
-        {vendor.website_url && (
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleWebsite}
-          >
-            <Ionicons name="globe-outline" size={18} color="#007AFF" />
-            <Text style={styles.actionButtonText}>Website</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {/* Invite to Platform Button */}
+      <TouchableOpacity
+        style={styles.inviteButton}
+        onPress={handleInviteToPlatform}
+      >
+        <Ionicons name="mail-outline" size={18} color="#FFFFFF" />
+        <Text style={styles.inviteButtonText}>Invite to Platform</Text>
+      </TouchableOpacity>
 
       {/* Relevance Score (for debugging/testing) */}
       {vendor.relevance_score >= 7 && (
@@ -147,6 +132,20 @@ export default function UnverifiedVendorCard({
           <Text style={styles.recommendedText}>Highly Recommended</Text>
         </View>
       )}
+
+      {/* Email Preview Modal */}
+      <EmailPreviewModal
+        visible={showEmailModal}
+        business={{
+          name: vendor.company_name,
+          email: vendor.contact_email || 'no-email@example.com',
+        }}
+        request={serviceRequest}
+        onClose={() => setShowEmailModal(false)}
+        onSent={() => {
+          console.log('Email draft created for:', vendor.company_name);
+        }}
+      />
     </TouchableOpacity>
   );
 }
@@ -258,21 +257,19 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     marginLeft: 4,
   },
-  actions: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-    paddingTop: 12,
-    marginTop: 4,
-  },
-  actionButton: {
+  inviteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 12,
   },
-  actionButtonText: {
-    fontSize: 14,
-    color: '#007AFF',
+  inviteButtonText: {
+    fontSize: 15,
+    color: '#FFFFFF',
     fontWeight: '600',
     marginLeft: 6,
   },

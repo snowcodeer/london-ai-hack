@@ -87,8 +87,17 @@ export interface Business {
     };
   };
 
+  // Verification and quality
+  is_verified: boolean;
+  is_insured: boolean;
+  description?: string;
+  website?: string;
+  years_in_business?: number;
+
   // Availability
   accepts_new_requests: boolean;
+  opening_hours?: string;
+  availability_status?: string;
 
   // Stats
   total_completed: number;
@@ -136,3 +145,22 @@ export const FLOOR_PRICES: Record<ProblemCategory, number> = {
   general_handyman: 55,
   other: 50,
 };
+
+// Email template types
+export interface BusinessInvitationEmailParams {
+  businessName: string;
+  businessEmail: string;
+  problemCategory: ProblemCategory;
+  urgency: 'low' | 'medium' | 'high';
+  locationCity: string;
+  locationArea: string;
+  aiSummary: string;
+  platformSignupUrl: string;
+}
+
+export interface EmailTemplate {
+  subject: string;
+  htmlBody: string;
+  textBody: string;
+  businessEmail?: string;
+}
