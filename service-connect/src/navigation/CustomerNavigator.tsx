@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomerDashboard from '../screens/customer/CustomerDashboard';
 import CameraScreen from '../screens/customer/CameraScreen';
 import ProblemAnalysisScreen from '../screens/customer/ProblemAnalysisScreen';
+import VendorListScreen from '../screens/customer/VendorListScreen';
 import CustomerProfileScreen from '../screens/customer/CustomerProfileScreen';
 import CustomerRequestsScreen from '../screens/customer/CustomerRequestsScreen';
 import CustomerMessagesScreen from '../screens/customer/CustomerMessagesScreen';
@@ -41,6 +42,11 @@ function DashboardStack() {
         name="ProblemAnalysis"
         component={ProblemAnalysisScreen}
         options={{ title: 'Problem Analysis' }}
+      />
+      <Stack.Screen
+        name="VendorList"
+        component={VendorListScreen}
+        options={{ title: 'Service Providers' }}
       />
     </Stack.Navigator>
   );

@@ -71,10 +71,16 @@ export default function ProblemAnalysisScreen() {
   const handleContinue = () => {
     if (!analysis || !photoUrl) return;
 
-    // Navigate to chat/form screen with analysis data
-    navigation.navigate('AppointmentDetails', {
+    // Navigate to VendorList screen with analysis data
+    // Using hardcoded London coordinates for demo (Old Street area)
+    // In production, use actual GPS location from device
+    navigation.navigate('VendorList', {
+      latitude: 51.5254,
+      longitude: -0.0877,
+      category: analysis.category,
+      aiDescription: analysis.description,
+      radiusMiles: 25,
       photoUrl,
-      analysis,
     });
   };
 
