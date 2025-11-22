@@ -3,9 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ServiceRequest, FLOOR_PRICES } from '../../types';
 import { useOrganization } from '../../contexts/MockAuthContext';
@@ -135,11 +136,6 @@ export default function SwipeableInboxScreen() {
           onSwipeRight={handleAccept}
         />
       </View>
-
-      {/* Help text */}
-      <Text style={styles.helpText}>
-        Swipe right to accept • Swipe left to decline
-      </Text>
     </SafeAreaView>
   );
 }
@@ -178,11 +174,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  helpText: {
-    textAlign: 'center',
-    fontSize: 15,
-    color: '#999',
-    paddingBottom: 20,
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 40,
+    gap: 32,
+  },
+  actionButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  declineButton: {
+    backgroundColor: '#FF3B30',
+  },
+  acceptButton: {
+    backgroundColor: '#34C759',
   },
   loadingContainer: {
     flex: 1,

@@ -72,16 +72,24 @@ export default function CameraScreen() {
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
       <View style={styles.overlay}>
+        {/* Back button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={28} color="white" />
+        </TouchableOpacity>
+
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerText}>Take a Photo of Your Problem</Text>
           <Text style={styles.subHeaderText}>
-            Center the issue in the frame
+            Position the issue in the center
           </Text>
         </View>
 
-        {/* Frame guide */}
-        <View style={styles.frameGuide} />
+        {/* Spacer to push controls to bottom */}
+        <View style={{ flex: 1 }} />
 
         {/* Controls */}
         <View style={styles.controls}>
@@ -122,6 +130,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
@@ -142,15 +162,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
-  },
-  frameGuide: {
-    flex: 1,
-    margin: 40,
-    marginTop: 100,
-    marginBottom: 200,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    borderRadius: 12,
   },
   controls: {
     flexDirection: 'row',

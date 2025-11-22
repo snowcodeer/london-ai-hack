@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,14 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
+  Image,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Appointment } from '../../types';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Mock appointment data
 const MOCK_APPOINTMENTS: Appointment[] = [
@@ -28,6 +33,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
     price: 95,
     status: 'upcoming',
     notes: 'Leaking pipe under kitchen sink',
+    problem_photo_url: '',
   },
   {
     id: 'apt_2',
@@ -45,6 +51,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
     price: 120,
     status: 'upcoming',
     notes: 'Install new light fixtures in living room',
+    problem_photo_url: '',
   },
   {
     id: 'apt_3',
@@ -62,6 +69,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
     price: 85,
     status: 'upcoming',
     notes: 'Assemble furniture and hang pictures',
+    problem_photo_url: '',
   },
   {
     id: 'apt_4',
@@ -78,6 +86,8 @@ const MOCK_APPOINTMENTS: Appointment[] = [
     },
     price: 110,
     status: 'upcoming',
+    notes: 'Bathroom tap dripping constantly',
+    problem_photo_url: '',
   },
   {
     id: 'apt_5',
@@ -95,6 +105,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
     price: 95,
     status: 'upcoming',
     notes: 'Fix faulty outlets in bedroom',
+    problem_photo_url: '',
   },
 ];
 
@@ -143,6 +154,8 @@ function getServiceIcon(serviceType: string): keyof typeof Ionicons.glyphMap {
 }
 
 export default function ScheduleScreen() {
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+
   const groupedAppointments = MOCK_APPOINTMENTS.reduce((groups, appointment) => {
     const date = appointment.date;
     if (!groups[date]) {
@@ -155,6 +168,14 @@ export default function ScheduleScreen() {
   const sortedDates = Object.keys(groupedAppointments).sort();
 
   const totalRevenue = MOCK_APPOINTMENTS.reduce((sum, apt) => sum + apt.price, 0);
+
+  const handleAppointmentPress = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+  };
+
+  const closeModal = () => {
+    setSelectedAppointment(null);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -182,6 +203,7 @@ export default function ScheduleScreen() {
                 key={appointment.id}
                 style={styles.appointmentCard}
                 activeOpacity={0.7}
+                onPress={() => handleAppointmentPress(appointment)}
               >
                 <View style={styles.timeColumn}>
                   <Text style={styles.timeText}>{appointment.time_start}</Text>
@@ -221,12 +243,139 @@ export default function ScheduleScreen() {
 
                 <View style={styles.priceColumn}>
                   <Text style={styles.priceText}>£{appointment.price}</Text>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color="#999"
+                    style={{ marginTop: 4 }}
+                  />
                 </View>
               </TouchableOpacity>
             ))}
           </View>
         ))}
       </ScrollView>
+
+      {/* Detail Modal */}
+      <Modal
+        visible={selectedAppointment !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeModal}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={closeModal}
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ScrollView style={styles.modalContent} bounces={false}>
+                {selectedAppointment && (
+                  <>
+                    {/* Close Button */}
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={closeModal}
+                    >
+                      <Ionicons name="close" size={28} color="#333" />
+                    </TouchableOpacity>
+
+                    {/* Problem Image */}
+                    {selectedAppointment.problem_photo_url && (
+                      <Image
+                        source={{ uri: selectedAppointment.problem_photo_url }}
+                        style={styles.modalImage}
+                        resizeMode="cover"
+                      />
+                    )}
+
+                    {/* Modal Header */}
+                    <View style={styles.modalHeader}>
+                      <View style={styles.serviceIconContainer}>
+                        <Ionicons
+                          name={getServiceIcon(selectedAppointment.service_type)}
+                          size={24}
+                          color="#007AFF"
+                        />
+                      </View>
+                      <View style={styles.headerTextContainer}>
+                        <Text style={styles.modalServiceType}>
+                          {selectedAppointment.service_type.replace('_', ' ')}
+                        </Text>
+                        <Text style={styles.modalTime}>
+                          {selectedAppointment.time_start} - {selectedAppointment.time_end}
+                        </Text>
+                      </View>
+                      <Text style={styles.modalPrice}>£{selectedAppointment.price}</Text>
+                    </View>
+
+                    {/* Modal Body */}
+                    <View style={styles.modalBody}>
+                      {selectedAppointment.notes && (
+                        <View style={styles.notesSection}>
+                          <Text style={styles.sectionTitle}>Details</Text>
+                          <Text style={styles.modalNotes}>{selectedAppointment.notes}</Text>
+                        </View>
+                      )}
+
+                      {/* Customer Details */}
+                      <View style={styles.detailsSection}>
+                        <Text style={styles.sectionTitle}>Customer Information</Text>
+                        <View style={styles.detailRow}>
+                          <Ionicons name="person-outline" size={20} color="#007AFF" />
+                          <Text style={styles.detailText}>
+                            {selectedAppointment.customer_name}
+                          </Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                          <Ionicons name="call-outline" size={20} color="#007AFF" />
+                          <Text style={styles.detailText}>
+                            {selectedAppointment.customer_phone}
+                          </Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                          <Ionicons name="location-outline" size={20} color="#007AFF" />
+                          <Text style={styles.detailText}>
+                            {selectedAppointment.location.address}, {selectedAppointment.location.city}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Action Buttons */}
+                      <View style={styles.modalActions}>
+                        <TouchableOpacity
+                          style={styles.callButton}
+                          onPress={() => {
+                            // Handle call action
+                            closeModal();
+                          }}
+                        >
+                          <Ionicons name="call" size={20} color="white" />
+                          <Text style={styles.actionButtonText}>Call Customer</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.directionsButton}
+                          onPress={() => {
+                            // Handle directions action
+                            closeModal();
+                          }}
+                        >
+                          <Ionicons name="navigate" size={20} color="white" />
+                          <Text style={styles.actionButtonText}>Get Directions</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </>
+                )}
+              </ScrollView>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -302,7 +451,7 @@ const styles = StyleSheet.create({
     borderRightColor: '#007AFF',
   },
   timeText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#007AFF',
   },
@@ -313,8 +462,9 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   timeTextSmall: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#999',
+    fontWeight: '500',
   },
   detailsColumn: {
     flex: 1,
@@ -369,5 +519,132 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#34C759',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: SCREEN_WIDTH * 0.9,
+    maxHeight: '85%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  modalContent: {
+    maxHeight: '100%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalImage: {
+    width: '100%',
+    height: 280,
+    backgroundColor: '#f0f0f0',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    gap: 12,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  modalServiceType: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#007AFF',
+    textTransform: 'capitalize',
+    marginBottom: 4,
+  },
+  modalTime: {
+    fontSize: 14,
+    color: '#666',
+  },
+  modalPrice: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#34C759',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  notesSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#007AFF',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  modalNotes: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
+  },
+  detailsSection: {
+    marginBottom: 24,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  detailText: {
+    fontSize: 15,
+    color: '#666',
+    flex: 1,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  callButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#34C759',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  directionsButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
