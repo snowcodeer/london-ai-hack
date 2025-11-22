@@ -1,0 +1,19 @@
+All businesses now have complete profiles including:
+
+✅ Opening Hours (7 days)
+✅ Availability Status
+✅ Years in Business
+✅ Insurance Status  
+✅ Verification Status
+✅ Business Description
+✅ Website URL
+
+See database_seed_complete.ts for the full reference data.
+
+Key additions:
+- Monday-Sunday hours with open/close times
+- "available" or "busy" status
+- 6-20 years experience range
+- All insured, most verified
+- Professional descriptions
+- UK-style websites (.co.uk)
