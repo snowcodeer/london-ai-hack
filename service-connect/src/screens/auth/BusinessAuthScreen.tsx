@@ -19,10 +19,6 @@ export default function BusinessAuthScreen() {
     switchToBusiness();
   };
 
-  const handleSignup = () => {
-    navigation.navigate('BusinessSignup');
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
@@ -48,25 +44,10 @@ export default function BusinessAuthScreen() {
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={handleSignup}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.primaryButtonText}>Create Account</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" />
-        </TouchableOpacity>
-
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <TouchableOpacity
-          style={styles.secondaryButton}
           onPress={handleLogin}
           activeOpacity={0.8}
         >
-          <Text style={styles.secondaryButtonText}>Sign In</Text>
+          <Text style={styles.primaryButtonText}>Sign In</Text>
         </TouchableOpacity>
       </View>
 
@@ -144,7 +125,6 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: '#34C759',
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 16,
@@ -154,39 +134,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
-    gap: 8,
   },
   primaryButtonText: {
     color: 'white',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E0E0E0',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#999',
-    fontWeight: '500',
-  },
-  secondaryButton: {
-    backgroundColor: 'white',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-  },
-  secondaryButtonText: {
-    color: '#333',
     fontSize: 17,
     fontWeight: '600',
   },

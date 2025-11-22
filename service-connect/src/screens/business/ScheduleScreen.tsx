@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,115 +11,11 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import { Appointment } from '../../types';
+import { getAppointments } from '../../services/appointments';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Mock appointment data
-const MOCK_APPOINTMENTS: Appointment[] = [
-  {
-    id: 'apt_1',
-    request_id: 'req_123',
-    customer_name: 'Sarah Johnson',
-    customer_phone: '+44 20 7123 4567',
-    service_type: 'plumbing',
-    date: new Date().toISOString().split('T')[0], // Today
-    time_start: '09:00',
-    time_end: '11:00',
-    location: {
-      address: '42 Brick Lane',
-      city: 'London',
-    },
-    price: 95,
-    status: 'upcoming',
-    notes: 'Leaking pipe under kitchen sink',
-    problem_photo_url: '',
-  },
-  {
-    id: 'apt_2',
-    request_id: 'req_124',
-    customer_name: 'Michael Chen',
-    customer_phone: '+44 20 7234 5678',
-    service_type: 'electrical',
-    date: new Date().toISOString().split('T')[0], // Today
-    time_start: '14:00',
-    time_end: '16:00',
-    location: {
-      address: '15 Shoreditch High Street',
-      city: 'London',
-    },
-    price: 120,
-    status: 'upcoming',
-    notes: 'Install new light fixtures in living room',
-    problem_photo_url: '',
-  },
-  {
-    id: 'apt_3',
-    request_id: 'req_125',
-    customer_name: 'Emma Williams',
-    customer_phone: '+44 20 7345 6789',
-    service_type: 'general_handyman',
-    date: getTomorrow(),
-    time_start: '10:00',
-    time_end: '12:00',
-    location: {
-      address: '78 Old Street',
-      city: 'London',
-    },
-    price: 85,
-    status: 'upcoming',
-    notes: 'Assemble furniture and hang pictures',
-    problem_photo_url: '',
-  },
-  {
-    id: 'apt_4',
-    request_id: 'req_126',
-    customer_name: 'James Brown',
-    customer_phone: '+44 20 7456 7890',
-    service_type: 'plumbing',
-    date: getTomorrow(),
-    time_start: '15:00',
-    time_end: '17:00',
-    location: {
-      address: '23 Hoxton Square',
-      city: 'London',
-    },
-    price: 110,
-    status: 'upcoming',
-    notes: 'Bathroom tap dripping constantly',
-    problem_photo_url: '',
-  },
-  {
-    id: 'apt_5',
-    request_id: 'req_127',
-    customer_name: 'Lisa Anderson',
-    customer_phone: '+44 20 7567 8901',
-    service_type: 'electrical',
-    date: getDateOffset(2),
-    time_start: '09:00',
-    time_end: '11:00',
-    location: {
-      address: '91 Great Eastern Street',
-      city: 'London',
-    },
-    price: 95,
-    status: 'upcoming',
-    notes: 'Fix faulty outlets in bedroom',
-    problem_photo_url: '',
-  },
-];
-
-function getTomorrow(): string {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().split('T')[0];
-}
-
-function getDateOffset(days: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().split('T')[0];
-}
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -154,9 +50,20 @@ function getServiceIcon(serviceType: string): keyof typeof Ionicons.glyphMap {
 }
 
 export default function ScheduleScreen() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const isFocused = useIsFocused();
 
-  const groupedAppointments = MOCK_APPOINTMENTS.reduce((groups, appointment) => {
+  useEffect(() => {
+    loadAppointments();
+  }, [isFocused]);
+
+  const loadAppointments = async () => {
+    const loadedAppointments = await getAppointments();
+    setAppointments(loadedAppointments);
+  };
+
+  const groupedAppointments = appointments.reduce((groups, appointment) => {
     const date = appointment.date;
     if (!groups[date]) {
       groups[date] = [];
@@ -167,7 +74,7 @@ export default function ScheduleScreen() {
 
   const sortedDates = Object.keys(groupedAppointments).sort();
 
-  const totalRevenue = MOCK_APPOINTMENTS.reduce((sum, apt) => sum + apt.price, 0);
+  const totalRevenue = appointments.reduce((sum, apt) => sum + apt.price, 0);
 
   const handleAppointmentPress = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -185,7 +92,7 @@ export default function ScheduleScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statBadge}>
             <Ionicons name="calendar" size={16} color="#007AFF" />
-            <Text style={styles.statText}>{MOCK_APPOINTMENTS.length} jobs</Text>
+            <Text style={styles.statText}>{appointments.length} jobs</Text>
           </View>
           <View style={styles.statBadge}>
             <Ionicons name="cash" size={16} color="#34C759" />

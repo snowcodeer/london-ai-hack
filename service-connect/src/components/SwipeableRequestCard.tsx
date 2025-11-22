@@ -185,38 +185,20 @@ export default function SwipeableRequestCard({ request, onSwipeLeft, onSwipeRigh
           </View>
         )}
       </View>
-
-      {/* Action Buttons */}
-      <View style={styles.actionsRow}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.declineButton]}
-          onPress={onSwipeLeft}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="close" size={32} color="white" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, styles.acceptButton]}
-          onPress={onSwipeRight}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="checkmark" size={32} color="white" />
-        </TouchableOpacity>
-      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
+    width: SCREEN_WIDTH - 32,
+    height: SCREEN_HEIGHT - 240,
     backgroundColor: 'white',
+    borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
     elevation: 8,
     overflow: 'hidden',
   },
@@ -250,12 +232,12 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '100%',
-    height: 350,
+    height: 240,
     backgroundColor: '#f0f0f0',
   },
   urgencyBadge: {
     position: 'absolute',
-    top: 210,
+    top: 200,
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
@@ -270,7 +252,8 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   content: {
-    padding: 20,
+    padding: 16,
+    paddingBottom: 24,
     flex: 1,
   },
   priceSection: {
@@ -281,7 +264,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   priceAmount: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '800',
     marginLeft: 8,
   },
@@ -339,30 +322,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
     marginLeft: 8,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 60,
-    gap: 40,
-  },
-  actionButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  declineButton: {
-    backgroundColor: '#FF3B30',
-  },
-  acceptButton: {
-    backgroundColor: '#34C759',
   },
 });

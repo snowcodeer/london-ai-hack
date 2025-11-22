@@ -7,6 +7,8 @@ import CustomerDashboard from '../screens/customer/CustomerDashboard';
 import CameraScreen from '../screens/customer/CameraScreen';
 import ProblemAnalysisScreen from '../screens/customer/ProblemAnalysisScreen';
 import CustomerProfileScreen from '../screens/customer/CustomerProfileScreen';
+import CustomerRequestsScreen from '../screens/customer/CustomerRequestsScreen';
+import CustomerMessagesScreen from '../screens/customer/CustomerMessagesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -86,16 +88,14 @@ export default function CustomerNavigator() {
       />
       <Tab.Screen
         name="Requests"
+        component={CustomerRequestsScreen}
         options={{ title: 'My Requests' }}
-      >
-        {() => <PlaceholderScreen title="My Requests" />}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="Messages"
+        component={CustomerMessagesScreen}
         options={{ title: 'Messages' }}
-      >
-        {() => <PlaceholderScreen title="Messages" />}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="Profile"
         component={CustomerProfileScreen}

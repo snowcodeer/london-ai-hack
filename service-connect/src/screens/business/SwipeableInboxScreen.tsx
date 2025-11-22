@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ServiceRequest, FLOOR_PRICES } from '../../types';
 import { useOrganization } from '../../contexts/MockAuthContext';
 import { getServiceRequests, updateServiceRequest } from '../../services/database';
+import { addAppointment, createAppointmentFromRequest } from '../../services/appointments';
 import SwipeableRequestCard from '../../components/SwipeableRequestCard';
 
 export default function SwipeableInboxScreen() {
@@ -50,20 +51,25 @@ export default function SwipeableInboxScreen() {
     }
   };
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     if (!organization || currentIndex >= requests.length) return;
 
     const request = requests[currentIndex];
 
+    // Update the service request status
     updateServiceRequest(request.id, {
       status: 'accepted',
       assigned_business_id: organization.id,
       responded_at: new Date().toISOString(),
     });
 
+    // Create and save appointment
+    const appointment = createAppointmentFromRequest(request, organization.id);
+    await addAppointment(appointment);
+
     Alert.alert(
       'Request Accepted! 🎉',
-      `You've accepted the job from ${request.customer_name}. They'll be notified shortly.`,
+      `You've accepted the job from ${request.customer_name}. Check your schedule to see the appointment.`,
       [{ text: 'Great!' }]
     );
 
@@ -171,8 +177,9 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingTop: 16,
   },
   actionsContainer: {
     flexDirection: 'row',

@@ -31,16 +31,6 @@ export default function SignInScreen() {
           >
             <Text style={styles.primaryButtonText}>Sign In</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => {
-              // Implement sign up flow
-              console.log('Sign up');
-            }}
-          >
-            <Text style={styles.secondaryButtonText}>Create Account</Text>
-          </TouchableOpacity>
         </View>
 
         <Text style={styles.infoText}>
@@ -87,19 +77,6 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    backgroundColor: 'white',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#007AFF',
-  },
-  secondaryButtonText: {
-    color: '#007AFF',
     fontSize: 18,
     fontWeight: '600',
   },
