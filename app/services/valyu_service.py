@@ -239,11 +239,28 @@ class ValyuService:
             logger.debug("Calling Valyu API...")
             import asyncio
             loop = asyncio.get_event_loop()
-            raw_response = await loop.run_in_executor(
-                None,
-                self.valyu_client.search,
-                formatted_prompt
-            )
+
+            # Get timeout from settings
+            settings = get_settings()
+            timeout_seconds = settings.search_timeout
+            logger.debug(f"Using search timeout: {timeout_seconds} seconds")
+
+            # Call with timeout
+            try:
+                raw_response = await asyncio.wait_for(
+                    loop.run_in_executor(
+                        None,
+                        self.valyu_client.search,
+                        formatted_prompt
+                    ),
+                    timeout=timeout_seconds
+                )
+            except asyncio.TimeoutError:
+                logger.error(f"Valyu API call timed out after {timeout_seconds} seconds")
+                raise TimeoutError(
+                    f"Search request timed out after {timeout_seconds} seconds. "
+                    f"Try increasing SEARCH_TIMEOUT or simplifying your search."
+                )
 
             # Parse response (now returns raw results as JSON)
             parsed_data = self._parse_valyu_response(raw_response, request)

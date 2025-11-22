@@ -69,10 +69,10 @@ class Settings(BaseSettings):
         description="Maximum number of results to return"
     )
     search_timeout: int = Field(
-        default=30,
+        default=60,
         ge=5,
-        le=120,
-        description="Search timeout in seconds"
+        le=300,
+        description="Search timeout in seconds (increased for complex searches)"
     )
 
     @field_validator("environment")
