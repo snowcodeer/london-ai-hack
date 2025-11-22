@@ -26,6 +26,7 @@ export interface UnverifiedVendor {
   service_categories: string[];
   website_url: string;
   phone_number: string;
+  contact_email: string | null;
   address: string;
   distance_from_user: string | null;
   operating_hours: string | null;

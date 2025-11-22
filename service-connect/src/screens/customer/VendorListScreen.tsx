@@ -17,7 +17,7 @@ import {
   getMatchingSummaryMessage,
   shouldShowUnverifiedVendors,
 } from '../../services/matchingWithValyu';
-import { ProblemCategory } from '../../types';
+import { ProblemCategory, ServiceRequest } from '../../types';
 import UnverifiedVendorCard from '../../components/UnverifiedVendorCard';
 import VerifiedBusinessCard from '../../components/VerifiedBusinessCard';
 
@@ -27,6 +27,8 @@ interface RouteParams {
   category: ProblemCategory;
   aiDescription?: string;
   radiusMiles?: number;
+  address?: string;
+  city?: string;
 }
 
 export default function VendorListScreen() {
@@ -38,11 +40,39 @@ export default function VendorListScreen() {
     category,
     aiDescription,
     radiusMiles = 25,
+    address = '',
+    city = 'London',
   } = route.params as RouteParams;
 
   const [isLoading, setIsLoading] = useState(true);
   const [matchingResult, setMatchingResult] = useState<MatchingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Create a mock service request for email generation
+  const mockServiceRequest: ServiceRequest = {
+    id: 'temp-' + Date.now(),
+    customer_id: 'temp-customer',
+    customer_name: 'Customer',
+    customer_phone: '',
+    customer_email: '',
+    problem_photo_url: '',
+    ai_description: aiDescription || 'Service request',
+    problem_category: category,
+    urgency: 'medium',
+    location: {
+      address: address || 'London',
+      city: city,
+      state: 'England',
+      zip: '',
+      coordinates: {
+        latitude,
+        longitude,
+      },
+    },
+    matched_business_ids: [],
+    status: 'pending',
+    created_at: new Date().toISOString(),
+  };
 
   useEffect(() => {
     searchForProviders();
@@ -105,6 +135,8 @@ export default function VendorListScreen() {
   const hasVerifiedBusinesses = matchingResult.verifiedBusinesses.length > 0;
   const hasUnverifiedVendors = matchingResult.unverifiedVendors.length > 0;
   const hasAnyProviders = hasVerifiedBusinesses || hasUnverifiedVendors;
+  // Show unverified vendors section if we have any (even if we also have verified businesses)
+  const showUnverified = hasUnverifiedVendors;
 
   return (
     <ScrollView style={styles.container}>
@@ -143,21 +175,32 @@ export default function VendorListScreen() {
               }}
             />
           ))}
+        </View>
+      )}
 
-          {/* Divider between verified and unverified */}
-          {hasVerifiedBusinesses && hasUnverifiedVendors && (
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Additional Local Businesses</Text>
-              <View style={styles.dividerLine} />
-            </View>
-          )}
+      {/* Unverified Vendors Section */}
+      {hasUnverifiedVendors && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="search" size={24} color="#FF9500" />
+            <Text style={styles.sectionTitle}>
+              {hasVerifiedBusinesses ? 'Additional Local Businesses' : 'Local Businesses Nearby'}
+            </Text>
+          </View>
+
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={20} color="#007AFF" />
+            <Text style={styles.infoText}>
+              These businesses are not yet verified on our platform. You can invite them to join by clicking the "Invite to Platform" button.
+            </Text>
+          </View>
 
           {/* Unverified Vendors - Sorted by Distance */}
           {matchingResult.unverifiedVendors.map((vendor, index) => (
             <UnverifiedVendorCard
               key={`unverified-${index}`}
               vendor={vendor}
+              serviceRequest={mockServiceRequest}
               onPress={() => {
                 // TODO: Navigate to vendor detail screen
                 console.log('Vendor pressed:', vendor.company_name);
