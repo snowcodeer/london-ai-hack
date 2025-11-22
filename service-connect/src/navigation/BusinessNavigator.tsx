@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableInboxScreen from '../screens/business/SwipeableInboxScreen';
 import ScheduleScreen from '../screens/business/ScheduleScreen';
+import BusinessProfileScreen from '../screens/business/BusinessProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -47,7 +48,7 @@ export default function BusinessNavigator() {
       />
       <Tab.Screen
         name="Profile"
-        component={PlaceholderScreen}
+        component={BusinessProfileScreen}
       />
     </Tab.Navigator>
   );

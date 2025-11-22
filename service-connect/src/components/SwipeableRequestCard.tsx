@@ -7,11 +7,12 @@ import {
   Dimensions,
   Animated,
   PanResponder,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ServiceRequest } from '../types';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
 
 interface Props {
@@ -106,12 +107,12 @@ export default function SwipeableRequestCard({ request, onSwipeLeft, onSwipeRigh
       style={[styles.card, animatedCardStyle]}
       {...panResponder.panHandlers}
     >
-      {/* Swipe indicators */}
-      <Animated.View style={[styles.likeLabel, { opacity: likeOpacity }]}>
-        <Text style={styles.likeLabelText}>ACCEPT</Text>
+      {/* Swipe indicators - Circular icons */}
+      <Animated.View style={[styles.likeIndicator, { opacity: likeOpacity }]}>
+        <Ionicons name="checkmark" size={80} color="#34C759" />
       </Animated.View>
-      <Animated.View style={[styles.nopeLabel, { opacity: nopeOpacity }]}>
-        <Text style={styles.nopeLabelText}>DECLINE</Text>
+      <Animated.View style={[styles.nopeIndicator, { opacity: nopeOpacity }]}>
+        <Ionicons name="close" size={80} color="#FF3B30" />
       </Animated.View>
 
       {/* Problem photo */}
@@ -184,75 +185,59 @@ export default function SwipeableRequestCard({ request, onSwipeLeft, onSwipeRigh
           </View>
         )}
       </View>
-
-      {/* Swipe instructions */}
-      <View style={styles.instructionsRow}>
-        <View style={styles.instruction}>
-          <Ionicons name="arrow-back" size={20} color="#FF3B30" />
-          <Text style={styles.instructionText}>Decline</Text>
-        </View>
-        <View style={styles.instruction}>
-          <Ionicons name="arrow-forward" size={20} color="#34C759" />
-          <Text style={styles.instructionText}>Accept</Text>
-        </View>
-      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    width: SCREEN_WIDTH - 40,
-    height: '75%',
+    width: SCREEN_WIDTH - 32,
+    height: SCREEN_HEIGHT - 240,
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
     elevation: 8,
     overflow: 'hidden',
   },
-  likeLabel: {
+  likeIndicator: {
     position: 'absolute',
-    top: 50,
-    right: 40,
+    top: '40%',
+    right: 60,
     zIndex: 1000,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(52, 199, 89, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 4,
     borderColor: '#34C759',
-    borderRadius: 8,
-    padding: 12,
-    transform: [{ rotate: '20deg' }],
   },
-  likeLabelText: {
-    color: '#34C759',
-    fontSize: 32,
-    fontWeight: '800',
-  },
-  nopeLabel: {
+  nopeIndicator: {
     position: 'absolute',
-    top: 50,
-    left: 40,
+    top: '40%',
+    left: 60,
     zIndex: 1000,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 4,
     borderColor: '#FF3B30',
-    borderRadius: 8,
-    padding: 12,
-    transform: [{ rotate: '-20deg' }],
-  },
-  nopeLabelText: {
-    color: '#FF3B30',
-    fontSize: 32,
-    fontWeight: '800',
   },
   photo: {
     width: '100%',
-    height: 250,
+    height: 240,
     backgroundColor: '#f0f0f0',
   },
   urgencyBadge: {
     position: 'absolute',
-    top: 210,
+    top: 200,
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
@@ -267,7 +252,8 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   content: {
-    padding: 20,
+    padding: 16,
+    paddingBottom: 24,
     flex: 1,
   },
   priceSection: {
@@ -278,7 +264,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   priceAmount: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '800',
     marginLeft: 8,
   },
@@ -336,21 +322,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
     marginLeft: 8,
-  },
-  instructionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 40,
-    paddingBottom: 20,
-  },
-  instruction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  instructionText: {
-    fontSize: 14,
-    color: '#999',
-    marginLeft: 8,
-    fontWeight: '600',
   },
 });

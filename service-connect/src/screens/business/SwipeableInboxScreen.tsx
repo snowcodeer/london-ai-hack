@@ -3,13 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ServiceRequest, FLOOR_PRICES } from '../../types';
 import { useOrganization } from '../../contexts/MockAuthContext';
 import { getServiceRequests, updateServiceRequest } from '../../services/database';
+import { addAppointment, createAppointmentFromRequest } from '../../services/appointments';
 import SwipeableRequestCard from '../../components/SwipeableRequestCard';
 
 export default function SwipeableInboxScreen() {
@@ -49,20 +51,25 @@ export default function SwipeableInboxScreen() {
     }
   };
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     if (!organization || currentIndex >= requests.length) return;
 
     const request = requests[currentIndex];
 
+    // Update the service request status
     updateServiceRequest(request.id, {
       status: 'accepted',
       assigned_business_id: organization.id,
       responded_at: new Date().toISOString(),
     });
 
+    // Create and save appointment
+    const appointment = createAppointmentFromRequest(request, organization.id);
+    await addAppointment(appointment);
+
     Alert.alert(
       'Request Accepted! 🎉',
-      `You've accepted the job from ${request.customer_name}. They'll be notified shortly.`,
+      `You've accepted the job from ${request.customer_name}. Check your schedule to see the appointment.`,
       [{ text: 'Great!' }]
     );
 
@@ -135,11 +142,6 @@ export default function SwipeableInboxScreen() {
           onSwipeRight={handleAccept}
         />
       </View>
-
-      {/* Help text */}
-      <Text style={styles.helpText}>
-        Swipe right to accept • Swipe left to decline
-      </Text>
     </SafeAreaView>
   );
 }
@@ -175,14 +177,34 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 16,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 40,
+    gap: 32,
   },
-  helpText: {
-    textAlign: 'center',
-    fontSize: 15,
-    color: '#999',
-    paddingBottom: 20,
+  actionButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  declineButton: {
+    backgroundColor: '#FF3B30',
+  },
+  acceptButton: {
+    backgroundColor: '#34C759',
   },
   loadingContainer: {
     flex: 1,

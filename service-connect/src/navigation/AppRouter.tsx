@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useMockAuth } from '../contexts/MockAuthContext';
 import CustomerNavigator from './CustomerNavigator';
 import BusinessNavigator from './BusinessNavigator';
-import RoleSelectionScreen from '../screens/auth/RoleSelectionScreen';
+import AuthNavigator from './AuthNavigator';
 
 export default function AppRouter() {
   const { userType } = useMockAuth();
@@ -13,7 +13,7 @@ export default function AppRouter() {
     <NavigationContainer>
       <View style={styles.container}>
         {!userType ? (
-          <RoleSelectionScreen />
+          <AuthNavigator />
         ) : userType === 'business' ? (
           <BusinessNavigator />
         ) : (

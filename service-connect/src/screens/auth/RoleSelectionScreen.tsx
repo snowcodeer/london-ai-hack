@@ -1,10 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useMockAuth } from '../../contexts/MockAuthContext';
 
 export default function RoleSelectionScreen() {
-  const { switchToCustomer, switchToBusiness } = useMockAuth();
+  const navigation = useNavigation();
+  const { switchToCustomer } = useMockAuth();
+
+  const handleBusinessPress = () => {
+    navigation.navigate('BusinessAuth');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,7 +56,7 @@ export default function RoleSelectionScreen() {
         {/* Business Card */}
         <TouchableOpacity
           style={[styles.roleCard, styles.businessCard]}
-          onPress={switchToBusiness}
+          onPress={handleBusinessPress}
           activeOpacity={0.9}
         >
           <View style={styles.cardGradient}>
