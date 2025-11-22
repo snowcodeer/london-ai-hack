@@ -1,15 +1,20 @@
 import { Valyu } from 'valyu-js';
 import { ProblemCategory } from '../types';
+import Constants from 'expo-constants';
 
 // Lazy initialize Valyu instance
 let valyuInstance: Valyu | null = null;
 
 function getValyu(): Valyu {
   if (!valyuInstance) {
-    // Valyu expects VALYU_API_KEY in environment
-    // Map from EXPO_PUBLIC_VALYU_API_KEY if that's what we have
-    if (process.env.EXPO_PUBLIC_VALYU_API_KEY && !process.env.VALYU_API_KEY) {
-      process.env.VALYU_API_KEY = process.env.EXPO_PUBLIC_VALYU_API_KEY;
+    // Get API key from expo config
+    const apiKey = Constants.expoConfig?.extra?.valyuApiKey || '';
+    if (!apiKey) {
+      throw new Error('VALYU_API_KEY is not set');
+    }
+    // Valyu SDK expects VALYU_API_KEY in environment
+    if (!process.env.VALYU_API_KEY) {
+      process.env.VALYU_API_KEY = apiKey;
     }
     valyuInstance = new Valyu(); // Uses VALYU_API_KEY from env
   }
