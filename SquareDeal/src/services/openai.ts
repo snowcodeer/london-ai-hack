@@ -1,5 +1,7 @@
 import { ProblemCategory } from '../types';
-import { OPENAI_API_KEY } from '@env';
+import Constants from 'expo-constants';
+
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.openaiApiKey || '';
 
 export interface VisionAnalysisResult {
   description: string;

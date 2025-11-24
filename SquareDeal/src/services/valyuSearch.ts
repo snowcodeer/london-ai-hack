@@ -1,9 +1,25 @@
 import { Valyu } from 'valyu-js';
 import { ProblemCategory } from '../types';
+import Constants from 'expo-constants';
 
-const VALYU_API_KEY = process.env.EXPO_PUBLIC_VALYU_API_KEY || '';
+// Lazy initialize Valyu instance
+let valyuInstance: Valyu | null = null;
 
-const valyu = new Valyu(VALYU_API_KEY);
+function getValyu(): Valyu {
+  if (!valyuInstance) {
+    // Get API key from expo config
+    const apiKey = Constants.expoConfig?.extra?.valyuApiKey || '';
+    if (!apiKey) {
+      throw new Error('VALYU_API_KEY is not set');
+    }
+    // Valyu SDK expects VALYU_API_KEY in environment
+    if (!process.env.VALYU_API_KEY) {
+      process.env.VALYU_API_KEY = apiKey;
+    }
+    valyuInstance = new Valyu(); // Uses VALYU_API_KEY from env
+  }
+  return valyuInstance;
+}
 
 export interface UnverifiedVendor {
   company_name: string;
@@ -154,8 +170,30 @@ TARGET: Return 10-20 highly relevant local small businesses that are good candid
 Focus on quality over quantity - we want businesses that will actually join the platform and provide excellent service to our users.`;
 
   try {
-    const response = await valyu.search({
-      query: prompt,
+    const valyu = getValyu();
+
+    // First get the city name from coordinates
+    const cityQuery = `What city is at latitude ${latitude} longitude ${longitude}?`;
+    const cityResponse = await valyu.search(cityQuery, {
+      maxNumResults: 1,
+      searchType: 'web',
+    });
+
+    let cityName = 'London'; // Default
+    if (cityResponse?.results?.[0]?.content) {
+      const content = cityResponse.results[0].content;
+      const match = content.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*,?\s*(UK|United Kingdom|England)\b/i);
+      if (match) {
+        cityName = match[1];
+      }
+    }
+
+    console.log(`\nSearching for businesses in: ${cityName}`);
+
+    // Search for business listings in that specific city
+    const searchQuery = `${problemDescription} companies in ${cityName} UK with phone numbers addresses business listings`;
+
+    const response = await valyu.search(searchQuery, {
       maxNumResults: 20,
       searchType: 'all',
     });
@@ -165,42 +203,85 @@ Focus on quality over quantity - we want businesses that will actually join the 
       return null;
     }
 
-    // Extract content from the first result (should be JSON)
-    const firstResult = response.results[0];
-    const jsonContent = firstResult.content;
+    console.log(`\nFound ${response.results.length} web results`);
+    console.log('First result content preview:');
+    console.log(response.results[0].content.substring(0, 500));
+    console.log('\n---\n');
 
-    // Try to parse JSON from the content
-    let parsedResult: ValyuSearchResult;
-    try {
-      // Remove markdown code blocks if present
-      const cleanedContent = jsonContent
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim();
+    // Extract business information from the combined search results
+    const businessData: UnverifiedVendor[] = [];
+    let resolvedAddress = `${latitude}, ${longitude}`;
 
-      parsedResult = JSON.parse(cleanedContent);
+    // Try to find actual business listings in the results
+    response.results.forEach((result) => {
+      const content = result.content;
+      const url = result.url;
 
-      // Sort unverified vendors by distance (closest first)
-      if (parsedResult.companies && parsedResult.companies.length > 0) {
-        parsedResult.companies.sort((a, b) => {
-          // Parse distance strings like "0.8 miles" or "2.5 miles"
-          const getDistance = (distStr: string | null): number => {
-            if (!distStr) return 999; // Put items without distance at the end
-            const match = distStr.match(/(\d+\.?\d*)/);
-            return match ? parseFloat(match[1]) : 999;
-          };
-
-          const distA = getDistance(a.distance_from_user);
-          const distB = getDistance(b.distance_from_user);
-
-          return distA - distB;
-        });
+      // Extract city/location from content
+      const cityMatch = content.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?),\s*([A-Z]{2}|UK|United Kingdom)/);
+      if (cityMatch && !resolvedAddress.includes(',')) {
+        resolvedAddress = cityMatch[0];
       }
-    } catch (parseError) {
-      console.error('Failed to parse Valyu response as JSON:', parseError);
-      console.error('Content:', jsonContent);
-      return null;
-    }
+
+      // Look for phone numbers in content
+      const phoneRegex = /(\+?[\d\s\(\)-]{10,})/g;
+      const phones = content.match(phoneRegex) || [];
+
+      // Look for addresses
+      const addressRegex = /\d+\s+[A-Za-z\s]+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Boulevard|Blvd|Way|Court|Ct|Place|Pl)[^\n]*/gi;
+      const addresses = content.match(addressRegex) || [];
+
+      // If this looks like a business listing page
+      if (phones.length > 0 || addresses.length > 0 || url.includes('maps') || url.includes('yelp')) {
+        const businessName = result.title.split('|')[0].split('-')[0].trim();
+
+        if (businessName.length > 3 && businessName.length < 100) {
+          businessData.push({
+            company_name: businessName,
+            service_categories: [problemDescription.split(' ')[0]],
+            website_url: url,
+            phone_number: phones[0] || '',
+            address: addresses[0] || '',
+            distance_from_user: null,
+            operating_hours: null,
+            rating: null,
+            rating_source: null,
+            total_reviews: null,
+            description: content.substring(0, 150).replace(/\s+/g, ' ').trim(),
+            specializations: [],
+            license_info: null,
+            emergency_service: false,
+            same_day_service: false,
+            free_estimates: null,
+            years_in_business: null,
+            relevance_score: 6,
+          });
+        }
+      }
+    });
+
+    console.log(`Extracted ${businessData.length} potential businesses`);
+
+    const parsedResult: ValyuSearchResult = {
+      problem_analysis: {
+        identified_issue: problemDescription,
+        primary_service_category: problemDescription.split(' ')[0],
+        secondary_categories: [],
+        urgency_level: 'moderate',
+      },
+      user_location: {
+        latitude,
+        longitude,
+        resolved_address: resolvedAddress,
+      },
+      companies: businessData,
+      metadata: {
+        total_companies_found: businessData.length,
+        search_date: new Date().toISOString(),
+        search_radius_miles: searchRadiusMiles,
+        recommendations: `Found ${businessData.length} ${problemDescription} companies in ${resolvedAddress}`,
+      },
+    };
 
     return parsedResult;
   } catch (error) {

@@ -17,6 +17,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "openaiApiKey": "${EXPO_PUBLIC_OPENAI_API_KEY}",
+      "valyuApiKey": "${EXPO_PUBLIC_VALYU_API_KEY}"
     }
   }
 }

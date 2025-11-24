@@ -1,5 +1,5 @@
 {
-  "name": "service-connect",
+  "name": "square-deal",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
@@ -7,6 +7,7 @@
     "ios": "expo start --ios"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.8.6",
     "@react-navigation/native": "^7.1.21",
     "@react-navigation/stack": "^7.6.7",

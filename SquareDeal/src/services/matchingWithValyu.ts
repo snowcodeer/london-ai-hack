@@ -90,9 +90,10 @@ export async function findAllServiceProviders(
     let valyuSearchResult: ValyuSearchResult | null = null;
     let unverifiedVendors: UnverifiedVendor[] = [...nonVerifiedFromDatabase];
 
-    console.log('Searching Valyu for unverified vendors to supplement results...');
+    if (verifiedBusinesses.length === 0) {
+      console.log('No verified businesses found, searching Valyu for additional unverified vendors...');
 
-    try {
+      try {
       const problemDescription = getProblemDescriptionFromCategory(category, aiDescription);
 
       valyuSearchResult = await searchUnverifiedVendors({
@@ -106,12 +107,11 @@ export async function findAllServiceProviders(
         // Add Valyu results to our existing non-verified providers
         unverifiedVendors = [...nonVerifiedFromDatabase, ...valyuSearchResult.companies];
         console.log(`Found ${valyuSearchResult.companies.length} additional unverified vendors via Valyu`);
-      } else {
-        console.log('Valyu returned no results');
       }
-    } catch (valyuError) {
-      console.error('Valyu search failed, continuing with SQLite results only:', valyuError);
-      // Continue with SQLite results even if Valyu fails
+      } catch (valyuError) {
+        console.error('Valyu search failed, continuing with SQLite results only:', valyuError);
+        // Continue with SQLite results even if Valyu fails
+      }
     }
 
     console.log(`Total unverified vendors: ${unverifiedVendors.length}`);
